@@ -38,8 +38,10 @@ contract NFT is ERC721, AccessControl {
         return super.supportsInterface(interfaceId);
     }
     // Only the minter can mint new NFTs
-    function mint(address to, uint256 tokenId) public onlyRole(MINTER_ROLE) {
-        _mint(to, tokenId);
+    function mint(address to, uint256 tokenId, uint256 count) public onlyRole(MINTER_ROLE) {
+        for (uint256 i = 0; i < count; i++) {
+            _mint(to, tokenId + i);
+        }
     }
     // grant the minter role to an address
     function grantMinterRole(address to) public onlyRole(DEFAULT_ADMIN_ROLE) {

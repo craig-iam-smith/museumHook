@@ -9,6 +9,7 @@ import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
 import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "v4-core/src/types/BeforeSwapDelta.sol";
+//import {Token, NFT} from "./Tokens.sol";
 
 contract mHook is BaseHook {
     using PoolIdLibrary for PoolKey;
@@ -17,6 +18,9 @@ contract mHook is BaseHook {
     // state variables should typically be unique to a pool
     // a single hook contract should be able to service multiple pools
     // ---------------------------------------------------------------
+
+//    Token public rewardToken;
+//    NFT public rewardNFT;
 
     mapping(PoolId => uint256 count) public beforeSwapCount;
     mapping(PoolId => uint256 count) public afterSwapCount;
@@ -131,9 +135,15 @@ contract mHook is BaseHook {
     function mintRewardTokens(PoolKey memory key, address user, uint256 conversionRate) internal {
         // mint the reward tokens to the user
         // this is a placeholder for the actual implementation
+//        rewardToken.mint(user, conversionRate);
     }
     function mintNFT(PoolKey memory key, address user, uint256 nftId, uint256 nftCount) internal {
         // mint the NFT to the user
         // this is a placeholder for the actual implementation
+//        rewardNFT.mint(user, nftId, nftCount);
     }
+//    function setRewardAddresses(address _rewardToken, address _rewardNFT) public {
+//        rewardToken = Token(_rewardToken);
+//        rewardNFT = NFT(_rewardNFT);
+//    }
 }
