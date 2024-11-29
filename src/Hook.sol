@@ -50,19 +50,21 @@ contract mHook is BaseHook {
     // NOTE: see IHooks.sol for function documentation
     // -----------------------------------------------
 
-    function beforeSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata)
+    function beforeSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata hookData)
         external
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         // keeping track of the number of times the hook is called
         beforeSwapCount[key.toId()]++;
+        // get the user from the hook data
+        address user = abi.decode(hookData, (address));
         // get the conversion rate of ERC20 reward tokens to the purchase token
         // this is a placeholder for the actual implementation
         uint256 conversionRate = 1;
         // mint the reward tokens to the user
         // this is a placeholder for the actual implementation
-        mintRewardTokens(key, msg.sender, conversionRate);
+        mintRewardTokens(key, user, conversionRate);
         // get info about available NFTs to mint
         // this is a placeholder for the actual implementation
         uint256 nftId = 1;
@@ -71,12 +73,13 @@ contract mHook is BaseHook {
         uint256 nftCount = 1;
         // mint the NFT to the user
         // this is a placeholder for the actual implementation
-        mintNFT(key, msg.sender, nftId, nftCount);
+        
+        mintNFT(key, user, nftId, nftCount);
 
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
 
-    function afterSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, BalanceDelta, bytes calldata)
+    function afterSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, BalanceDelta, bytes calldata hookData)
         external
         override
         returns (bytes4, int128)
@@ -91,10 +94,13 @@ contract mHook is BaseHook {
         IPoolManager.ModifyLiquidityParams calldata,
         bytes calldata
     ) external override returns (bytes4) {
+
         beforeAddLiquidityCount[key.toId()]++;
+        // get the user from the hook data
+        address user = abi.decode(hookData, (address));
         // if liquidity adder is the not pool manager, mint the NFTs to the user
-        if (msg.sender != address(poolManager)) {
-            liquidityAge(key, msg.sender);
+        if (user != address(poolManager)) {
+            liquidityAge(key, user);
         }
         return BaseHook.beforeAddLiquidity.selector;
     }
@@ -106,11 +112,13 @@ contract mHook is BaseHook {
         bytes calldata
     ) external override returns (bytes4) {
         beforeRemoveLiquidityCount[key.toId()]++;
+        // get the user from the hook data
+        address user = abi.decode(hookData, (address));
         // if liquidity remover is the not pool manager, burn the NFTs from the user
         // and the reward to
-        if (msg.sender != address(poolManager)) {
-            if (getAge(key, msg.sender) > 1000) {
-                mintRewardTokens(key, msg.sender, 1);
+        if (user != address(poolManager)) {
+            if (getAge(key, user) > 1000) {
+                mintRewardTokens(key, user, 1);
             }
         }
         return BaseHook.beforeRemoveLiquidity.selector;
