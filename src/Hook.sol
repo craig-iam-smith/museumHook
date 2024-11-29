@@ -23,6 +23,7 @@ contract mHook is BaseHook {
 
     mapping(PoolId => uint256 count) public beforeAddLiquidityCount;
     mapping(PoolId => uint256 count) public beforeRemoveLiquidityCount;
+    mapping(PoolId => mapping(address => uint256)) public myAge;
 
     constructor(IPoolManager _poolManager) BaseHook(_poolManager) {}
 
@@ -54,7 +55,24 @@ contract mHook is BaseHook {
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
+        // keeping track of the number of times the hook is called
         beforeSwapCount[key.toId()]++;
+        // get the conversion rate of ERC20 reward tokens to the purchase token
+        // this is a placeholder for the actual implementation
+        uint256 conversionRate = 1;
+        // mint the reward tokens to the user
+        // this is a placeholder for the actual implementation
+        mintRewardTokens(key, msg.sender, conversionRate);
+        // get info about available NFTs to mint
+        // this is a placeholder for the actual implementation
+        uint256 nftId = 1;
+        // get number of NFTs to mint
+        // this is a placeholder for the actual implementation
+        uint256 nftCount = 1;
+        // mint the NFT to the user
+        // this is a placeholder for the actual implementation
+        mintNFT(key, msg.sender, nftId, nftCount);
+
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
 
@@ -74,6 +92,10 @@ contract mHook is BaseHook {
         bytes calldata
     ) external override returns (bytes4) {
         beforeAddLiquidityCount[key.toId()]++;
+        // if liquidity adder is the not pool manager, mint the NFTs to the user
+        if (msg.sender != address(poolManager)) {
+            liquidityAge(key, msg.sender);
+        }
         return BaseHook.beforeAddLiquidity.selector;
     }
 
@@ -84,6 +106,31 @@ contract mHook is BaseHook {
         bytes calldata
     ) external override returns (bytes4) {
         beforeRemoveLiquidityCount[key.toId()]++;
+        // if liquidity remover is the not pool manager, burn the NFTs from the user
+        // and the reward to
+        if (msg.sender != address(poolManager)) {
+            if (getAge(key, msg.sender) > 1000) {
+                mintRewardTokens(key, msg.sender, 1);
+            }
+        }
         return BaseHook.beforeRemoveLiquidity.selector;
+    }
+    function liquidityAge(PoolKey memory key, address user) internal returns (uint256) {
+        // set the liquidity age to the current block timestamp
+        if (myAge[key.toId()][user] == 0) {
+            myAge[key.toId()][user] = block.timestamp;
+        }
+    }
+
+    function getAge(PoolKey memory key, address user) internal view returns (uint256) {
+        return myAge[key.toId()][user];
+    }
+    function mintRewardTokens(PoolKey memory key, address user, uint256 conversionRate) internal {
+        // mint the reward tokens to the user
+        // this is a placeholder for the actual implementation
+    }
+    function mintNFT(PoolKey memory key, address user, uint256 nftId, uint256 nftCount) internal {
+        // mint the NFT to the user
+        // this is a placeholder for the actual implementation
     }
 }
