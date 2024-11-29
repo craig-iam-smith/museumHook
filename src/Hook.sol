@@ -50,15 +50,14 @@ contract mHook is BaseHook {
     // NOTE: see IHooks.sol for function documentation
     // -----------------------------------------------
 
-    function beforeSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata hookData)
+    function beforeSwap(address user, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata )
         external
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         // keeping track of the number of times the hook is called
         beforeSwapCount[key.toId()]++;
-        // get the user from the hook data
-        address user = abi.decode(hookData, (address));
+
         // get the conversion rate of ERC20 reward tokens to the purchase token
         // this is a placeholder for the actual implementation
         uint256 conversionRate = 1;
@@ -79,7 +78,7 @@ contract mHook is BaseHook {
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
 
-    function afterSwap(address, PoolKey calldata key, IPoolManager.SwapParams calldata, BalanceDelta, bytes calldata hookData)
+    function afterSwap(address user, PoolKey calldata key, IPoolManager.SwapParams calldata, BalanceDelta, bytes calldata hookData)
         external
         override
         returns (bytes4, int128)
@@ -89,15 +88,13 @@ contract mHook is BaseHook {
     }
 
     function beforeAddLiquidity(
-        address,
+        address user,
         PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata,
         bytes calldata
     ) external override returns (bytes4) {
 
         beforeAddLiquidityCount[key.toId()]++;
-        // get the user from the hook data
-        address user = abi.decode(hookData, (address));
         // if liquidity adder is the not pool manager, mint the NFTs to the user
         if (user != address(poolManager)) {
             liquidityAge(key, user);
@@ -106,14 +103,12 @@ contract mHook is BaseHook {
     }
 
     function beforeRemoveLiquidity(
-        address,
+        address user,
         PoolKey calldata key,
         IPoolManager.ModifyLiquidityParams calldata,
         bytes calldata
     ) external override returns (bytes4) {
         beforeRemoveLiquidityCount[key.toId()]++;
-        // get the user from the hook data
-        address user = abi.decode(hookData, (address));
         // if liquidity remover is the not pool manager, burn the NFTs from the user
         // and the reward to
         if (user != address(poolManager)) {
