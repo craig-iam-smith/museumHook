@@ -9,7 +9,11 @@ import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "v4-core/src/types/PoolId.sol";
 import {BalanceDelta} from "v4-core/src/types/BalanceDelta.sol";
 import {BeforeSwapDelta, BeforeSwapDeltaLibrary} from "v4-core/src/types/BeforeSwapDelta.sol";
-import {Token, NFT} from "./Tokens.sol";
+// import erc20 interface from openzeppelin
+// import erc721 interface from openzeppelin
+import {IERC20m} from "./IERC20m.sol";
+import {IERC721m} from "./IERC721m.sol";
+
 import {console} from "forge-std/console.sol";
 
 contract mHook is BaseHook {
@@ -20,8 +24,8 @@ contract mHook is BaseHook {
     // a single hook contract should be able to service multiple pools
     // ---------------------------------------------------------------
 
-    Token public rewardToken;
-    NFT public rewardNFT;
+    IERC20m public rewardToken;
+    IERC721m public rewardNFT;
 
     mapping(PoolId => uint256 count) public beforeSwapCount;
     mapping(PoolId => uint256 count) public afterSwapCount;
@@ -78,7 +82,7 @@ contract mHook is BaseHook {
         // mint the NFT to the user
         // this is a placeholder for the actual implementation
         
-        mintNFT(key, user, nftId, nftCount);
+        mintNFT(user, nftId, nftCount);
 
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
@@ -133,20 +137,21 @@ contract mHook is BaseHook {
     function getAge(PoolKey memory key, address user) internal view returns (uint256) {
         return myAge[key.toId()][user];
     }
+
     function mintRewardTokens(address user, uint256 conversionRate) internal {
         // mint the reward tokens to the user
         // this is a placeholder for the actual implementation
-//        rewardToken.mint(user, conversionRate);
+        rewardToken.mint(user, conversionRate);
         console.log("minting reward tokens to user", user);
         console.log("token", address(rewardToken));
     }
-    function mintNFT(PoolKey memory key, address user, uint256 nftId, uint256 nftCount) internal {
+    function mintNFT(address user, uint256 nftId, uint256 nftCount) internal {
         // mint the NFT to the user
         // this is a placeholder for the actual implementation
 //        rewardNFT.mint(user, nftId, nftCount);
     }
     function setRewardAddresses(address _rewardToken, address _rewardNFT) public {
-        rewardToken = Token(_rewardToken);
-        rewardNFT = NFT(_rewardNFT);
+        rewardToken = IERC20m(_rewardToken);
+        rewardNFT = IERC721m(_rewardNFT);
     }
 }

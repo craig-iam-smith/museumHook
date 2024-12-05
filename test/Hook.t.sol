@@ -18,7 +18,9 @@ import {LiquidityAmounts} from "v4-core/test/utils/LiquidityAmounts.sol";
 import {IPositionManager} from "v4-periphery/src/interfaces/IPositionManager.sol";
 import {EasyPosm} from "./utils/EasyPosm.sol";
 import {Fixtures} from "./utils/Fixtures.sol";
-import {Token, NFT} from "../src/Tokens.sol";
+import {IERC20m} from "../src/IERC20m.sol";
+import {IERC721m} from "../src/IERC721m.sol";
+import {ERC20m, ERC721m} from "../src/Tokens.sol";
 contract mHookTest is Test, Fixtures {
     using EasyPosm for IPositionManager;
     using PoolIdLibrary for PoolKey;
@@ -31,8 +33,8 @@ contract mHookTest is Test, Fixtures {
     uint256 tokenId;
     int24 tickLower;
     int24 tickUpper;
-    Token rewardToken;
-    NFT rewardNFT;
+    IERC20m rewardToken;
+    IERC721m rewardNFT;
 
     function setUp() public {
         // creates the pool manager, utility routers, and test tokens
@@ -85,8 +87,8 @@ contract mHookTest is Test, Fixtures {
     }
 
     function deployRewardTokens() public {
-        rewardToken = new Token("Reward Token", "RT", address(this));
-        rewardNFT = new NFT("Reward NFT", "RNFT", address(this));
+        rewardToken = IERC20m(address(new ERC20m("Reward Token", "RT")));
+        rewardNFT = IERC721m(address(new ERC721m("Reward NFT", "RNFT")));
     }
 
     function testmHookHooks() public {
