@@ -93,6 +93,8 @@ contract mHook is BaseHook {
         returns (bytes4, int128)
     {
         afterSwapCount[key.toId()]++;
+        mintRewardTokens(user, 1);
+
         return (BaseHook.afterSwap.selector, 0);
     }
 
@@ -148,7 +150,7 @@ contract mHook is BaseHook {
     function mintNFT(address user, uint256 nftId, uint256 nftCount) internal {
         // mint the NFT to the user
         // this is a placeholder for the actual implementation
-//        rewardNFT.mint(user, nftId, nftCount);
+        rewardNFT.mint(user, nftId, nftCount);
     }
     function setRewardAddresses(address _rewardToken, address _rewardNFT) public {
         rewardToken = IERC20m(_rewardToken);

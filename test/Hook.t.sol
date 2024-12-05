@@ -105,10 +105,35 @@ contract mHookTest is Test, Fixtures {
         BalanceDelta swapDelta = swap(key, zeroForOne, amountSpecified, ZERO_BYTES);
         // ------------------- //
 
-    //    assertEq(int256(swapDelta.amount0()), amountSpecified);
+        assertEq(int256(swapDelta.amount0()), amountSpecified);
 
-    //    assertEq(hook.beforeSwapCount(poolId), 1);
-    //    assertEq(hook.afterSwapCount(poolId), 1);
+        assertEq(hook.beforeSwapCount(poolId), 1);
+        assertEq(hook.afterSwapCount(poolId), 1);
+    }
+    function testmHookRewards() public {
+        // positions were created in setup()
+        assertEq(hook.beforeAddLiquidityCount(poolId), 1);
+        assertEq(hook.beforeRemoveLiquidityCount(poolId), 0);
+
+        assertEq(hook.beforeSwapCount(poolId), 0);
+        assertEq(hook.afterSwapCount(poolId), 0);
+
+        // Perform a test swap //
+        bool zeroForOne = true;
+        int256 amountSpecified = -1e18; // negative number indicates exact input swap!
+        BalanceDelta swapDelta = swap(key, zeroForOne, amountSpecified, ZERO_BYTES);
+        // ------------------- //
+
+        assertEq(int256(swapDelta.amount0()), amountSpecified);
+
+        assertEq(hook.beforeSwapCount(poolId), 1);
+        assertEq(hook.afterSwapCount(poolId), 1);
+        // check to see if rewards were minted
+        assertLt(rewardToken.balanceOf(address(this)), 1);
+        assertLt(rewardNFT.balanceOf(address(this)), 1);
+        console.log("Reward token balance user: %s", rewardToken.balanceOf(address(0x2e234DAe75C793f67A35089C9d99245E1C58470b)));
+        console.log("Reward NFT balance user: %s", rewardNFT.balanceOf(address(0x2e234DAe75C793f67A35089C9d99245E1C58470b)));
+
     }
 
     function testLiquidityHooks() public {
