@@ -23,9 +23,13 @@ contract mHook is BaseHook {
     // state variables should typically be unique to a pool
     // a single hook contract should be able to service multiple pools
     // ---------------------------------------------------------------
+    mapping(address => uint256) public totalPurchases;
 
     IERC20m public rewardToken;
+    IERC20m public yieldToken;
     IERC721m public rewardNFT;
+    uint256 public rewardRate = 100;
+    uint256 public nftRate = 1e18;
 
     mapping(PoolId => uint256 count) public beforeSwapCount;
     mapping(PoolId => uint256 count) public afterSwapCount;
@@ -59,41 +63,51 @@ contract mHook is BaseHook {
     // NOTE: see IHooks.sol for function documentation
     // -----------------------------------------------
 
-    function beforeSwap(address user, PoolKey calldata key, IPoolManager.SwapParams calldata, bytes calldata )
+    function beforeSwap(address user, PoolKey calldata key, IPoolManager.SwapParams calldata swapParams, bytes calldata )
         external
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         // keeping track of the number of times the hook is called
         beforeSwapCount[key.toId()]++;
-
-        // get the conversion rate of ERC20 reward tokens to the purchase token
-        // this is a placeholder for the actual implementation
-        uint256 conversionRate = 1;
-        // mint the reward tokens to the user
-        // this is a placeholder for the actual implementation
-        mintRewardTokens(user, conversionRate);
-        // get info about available NFTs to mint
-        // this is a placeholder for the actual implementation
-        uint256 nftId = 1;
-        // get number of NFTs to mint
-        // this is a placeholder for the actual implementation
-        uint256 nftCount = 1;
-        // mint the NFT to the user
-        // this is a placeholder for the actual implementation
-        
-        mintNFT(user, nftId, nftCount);
+        // verify that this is a purchase of the token with Eth
+        // if (!key.currency0.isAddressZero()) return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
+        // if (!swapParams.zeroForOne) return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
 
         return (BaseHook.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);
     }
 
-    function afterSwap(address user, PoolKey calldata key, IPoolManager.SwapParams calldata, BalanceDelta, bytes calldata hookData)
+    function afterSwap(address user, PoolKey calldata key, IPoolManager.SwapParams calldata swapParams, BalanceDelta delta, bytes calldata hookData)
         external
         override
         returns (bytes4, int128)
     {
+        uint256 rewardAmount;
+        // verify that this is a purchase of the token with Eth
+        // if (!key.currency0.isAddressZero()) return (BaseHook.beforeSwap.selector, 0);
+        // if (!swapParams.zeroForOne) return (BaseHook.beforeSwap.selector, 0);
+
+// @dev todo- decode the hook data to get the sponsor and NFT id
+    //    (address sponsor, uint256 nftId) = abi.decode(hookData, (address, uint256));
+        uint256 nftId = getNFTId(user);
         afterSwapCount[key.toId()]++;
-        mintRewardTokens(user, 1);
+ 
+        // get the amount Eth
+        uint256 ethSpendAmount = swapParams.amountSpecified < 0 
+            ? uint256(-swapParams.amountSpecified) 
+            : uint256(int256(-delta.amount0()));
+        // compute the reward amount
+        rewardAmount = ethSpendAmount * rewardRate / 100;
+        // get the number of NFTs to mint (number of Eth spent) 
+        uint256 nftCount = ethSpendAmount / nftRate;
+        
+        // temporary manual setting of rewards
+        rewardAmount = 1;
+        nftCount = 1;
+        console.log("user: %s", user);
+        mintRewardTokens(user, rewardAmount);
+        mintNFT(user, nftId, nftCount);
+//        mintYieldTokens(sponsor, ethSpendAmount);
 
         return (BaseHook.afterSwap.selector, 0);
     }
@@ -140,6 +154,15 @@ contract mHook is BaseHook {
         return myAge[key.toId()][user];
     }
 
+    function mintYieldTokens(address user, uint256 amount) internal {
+        // mint the yield tokens to the user who provided liquidity
+        // this is a placeholder for the actual implementation
+        yieldToken.mint(user, amount);
+    }
+    function getNFTId(address user) internal view returns (uint256) {
+        // @dev - provide callout to get the NFT id
+        return 1;
+    }
     function mintRewardTokens(address user, uint256 conversionRate) internal {
         // mint the reward tokens to the user
         // this is a placeholder for the actual implementation
@@ -152,8 +175,9 @@ contract mHook is BaseHook {
         // this is a placeholder for the actual implementation
         rewardNFT.mint(user, nftId, nftCount);
     }
-    function setRewardAddresses(address _rewardToken, address _rewardNFT) public {
+    function setRewardAddresses(address _rewardToken, address _rewardNFT, address _yieldToken) public {
         rewardToken = IERC20m(_rewardToken);
         rewardNFT = IERC721m(_rewardNFT);
+        yieldToken = IERC20m(_yieldToken);
     }
 }

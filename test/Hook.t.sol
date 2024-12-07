@@ -34,6 +34,7 @@ contract mHookTest is Test, Fixtures {
     int24 tickLower;
     int24 tickUpper;
     IERC20m rewardToken;
+    IERC20m yieldToken;
     IERC721m rewardNFT;
 
     function setUp() public {
@@ -54,7 +55,7 @@ contract mHookTest is Test, Fixtures {
         bytes memory constructorArgs = abi.encode(manager); //Add all the necessary constructor arguments from the hook
         deployCodeTo("Hook.sol:mHook", constructorArgs, flags);
         hook = mHook(flags);
-        hook.setRewardAddresses(address(rewardToken), address(rewardNFT));
+        hook.setRewardAddresses(address(rewardToken), address(rewardNFT), address(yieldToken));
         // Create the pool
         key = PoolKey(currency0, currency1, 3000, 60, IHooks(hook));
         poolId = key.toId();
@@ -87,8 +88,9 @@ contract mHookTest is Test, Fixtures {
     }
 
     function deployRewardTokens() public {
-        rewardToken = IERC20m(address(new ERC20m("Reward Token", "RT")));
-        rewardNFT = IERC721m(address(new ERC721m("Reward NFT", "RNFT")));
+        rewardToken = IERC20m(address(new ERC20m("Merch Token", "MERCH")));
+        rewardNFT = IERC721m(address(new ERC721m("Museum NFT", "MNFT")));
+        yieldToken = IERC20m(address(new ERC20m("Yield Token", "YIELD")));
     }
 
     function testmHookHooks() public {
@@ -102,6 +104,7 @@ contract mHookTest is Test, Fixtures {
         // Perform a test swap //
         bool zeroForOne = true;
         int256 amountSpecified = -1e18; // negative number indicates exact input swap!
+
         BalanceDelta swapDelta = swap(key, zeroForOne, amountSpecified, ZERO_BYTES);
         // ------------------- //
 
