@@ -1,3 +1,26 @@
+# museumHook
+
+The real world problem we are solving is tokenizing non-traditional real world assets to support public goods.  Our scenario is museums with low attendance that are having trouble meeting their expenses. The museums have assets (displays) that have verifiable value but no way to leverage the value of the asset other than charging to view it.  Let’s unlock the value of their real world assets (RWAs) by tokenizing, and using the value to generate income by using a revenue generating protocol like Aave.
+
+Let’s use a car museum for our example. (Side note: there are many legal issues, we are ignoring all of them for now)
+
+Offering part of an individual car for sale would cause logistical confusion and valuation risk because of a unique vehicle. We can take tokens of the RWAs, deposit them in to a contract (let’s call it a garage) and issue ERC20 tokens backed by the group of RWAs.  This gives us a fungible token, that is completely liquid, backed by a garage that contains cars that all have a verifiable appraised value. We will have an oracle that keeps track of the value each car and the total value. ( The appraisal process and updating is a legal issue )  
+
+We now have a fungible token, backed by rising value assets that can then be sold and the museum can take the proceeds to a protocol to produce sustainable income.   
+
+Uniswap is the platform to sell these tokens, providing single sided liquidity to a Uniswap pool is great to handle the sale of fungible tokens, but to generate interest we need to offer more than just an asset backed token.  This is where the Uniswap V4 hook comes in. Just having an asset backed token is not enough to sell quickly, we need the idea of supporting a museum and rewards to get people involved.  Offering both NFTs and ERC20 $MERCH tokens to purchase tickets or merchandise at the gift shop are great rewards.  
+
+The app for the museum can allow the user to specify their rewards.  
+
+The hook will mint rewards to purchaser based on the provided hook data (which NFT, rate of dispensing $MERCH tokens based on purchase size)  Our afterSwap hook mints erc20 and erc721 tokens based on inputs from hook data
+
+
+
+
+
+
+
+
 # v4-template
 ### **A template for writing Uniswap v4 Hooks 🦄**
 
